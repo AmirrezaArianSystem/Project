@@ -16,11 +16,14 @@ namespace Application.Common.Mappeing
         public Mapper()
         {
             CreateMap<City, CityDto>().ReverseMap();
+            //CreateMap<List<City>,List<CityDto>>().ReverseMap();
             CreateMap<Province, ProvinceDto>().ReverseMap();
             CreateMap<ProvinceCreateCommand,Province>().ForMember(dest => dest.Id, otp => otp.MapFrom(src => SetGuid())).
                 ForMember(dest => dest.Name, otp => otp.MapFrom(src => RemoveWhitSpace(src.Name)));
             CreateMap<CityCreateCommand,City>().ForMember(dest=>dest.Id,otp=>otp.MapFrom(src=> SetGuid())).
                 ForMember(dest => dest.Name, otp =>otp.MapFrom(src=> RemoveWhitSpace(src.Name)));
+            CreateMap<ProvinceUpdateCommand, Province>().ReverseMap();
+
         }
 
         private string RemoveWhitSpace(string name)

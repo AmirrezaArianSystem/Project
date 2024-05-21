@@ -17,7 +17,7 @@ public class CityCreateCommand : IRequest<ResultObject<Guid>>
     [Required(AllowEmptyStrings =false)]
     [MaxLength(100)]
     public string Name { get; set; }
-    [Required(AllowEmptyStrings = false)]
+    [Required(AllowEmptyStrings = false)] 
     public Guid ProvinceId { get; set; }
 
 }

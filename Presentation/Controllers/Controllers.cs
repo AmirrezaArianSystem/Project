@@ -2,6 +2,7 @@
 using Application.Common.Intefaces;
 using Application.Common.Models;
 using Application.Queries;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,19 +28,18 @@ public class CityController : ControllerBase
     public async Task<ResultObject<List<CityDto>>> GetCities(string? name, CancellationToken cancellationToken)
     {
         var resultObject = await _mediatR.Send(new CitiesGetQuery(name),cancellationToken);
-
         return resultObject;
     }
     [HttpPost]
     public async Task<ResultObject<Guid>> CreateCity([FromBody] CityCreateCommand cityCreateCommand, CancellationToken cancellationToken)
     {
-        var result = await _mediatR.Send(cityCreateCommand,cancellationToken);
+        var result = await _mediatR.Send(cityCreateCommand, cancellationToken);
         return result;
     }
     [HttpDelete]
     public async Task<ResultObject<string>> DeleteCity([FromBody] CityDeleteCommand cityDeleteCommand, CancellationToken cancellationToken)
     {
-        var resultObject = await _mediatR.Send(cityDeleteCommand,cancellationToken);
+        var resultObject = await _mediatR.Send(cityDeleteCommand, cancellationToken);
 
         return resultObject;
     }
@@ -47,7 +47,7 @@ public class CityController : ControllerBase
     [HttpPut]
     public async Task<ResultObject<string>> UpdateCity([FromBody] CityUpdateCommand cityUpdateCommand, CancellationToken cancellationToken)
     {
-        var resultObject = await _mediatR.Send(cityUpdateCommand,cancellationToken);
+        var resultObject = await _mediatR.Send(cityUpdateCommand, cancellationToken);
         return resultObject;
     }
 

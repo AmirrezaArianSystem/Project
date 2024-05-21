@@ -8,16 +8,14 @@ using System.Threading.Tasks;
 
 namespace Application.Common;
 
-public abstract class BaseHandler<T> where T : class
+public abstract class BaseHandler  
 {
     protected IUnitOfWork _unitOfWork { get;}
-    protected T _repository { get;  }
     protected MappingGenerice _mappingGenerice { get; }
 
-    protected BaseHandler(IUnitOfWork unitOfWork, T repository, MappingGenerice mappingGenerice)
+    protected BaseHandler(IUnitOfWork unitOfWork,  MappingGenerice mappingGenerice)
     {
         _unitOfWork = unitOfWork;
-        _repository = repository;
         _mappingGenerice = mappingGenerice;
     }
 }

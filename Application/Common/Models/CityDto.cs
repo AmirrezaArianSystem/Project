@@ -12,7 +12,7 @@ namespace Application.Common.Models
         #region public string Name { get; set; }
         public string Name { get; set; }
         #endregion /public string Name { get; set; }
-
+        public Guid Id { get; set; }
         //#region public Province Province { get; set; }
         //public ProvinceDto ProvinceDto { get; set; }
         //#endregion /public Province Province { get; set; }

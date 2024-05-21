@@ -57,11 +57,11 @@ builder.Services.AddMediatR(conf =>
 builder.Services.AddDbContext<CitiesAndProvincesContext>(opt => opt.UseInMemoryDatabase("MyDatabase"));
 
 builder.Services.AddScoped<ResultObject<object>>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<ICityRepository,CityRepository>();
-builder.Services.AddScoped<IProvinceRepository, ProvinceRepository>();
+//builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+//builder.Services.AddScoped<ICityRepository,CityRepository>();
+//builder.Services.AddScoped<IProvinceRepository, ProvinceRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddSingleton<MappingGenerice>();
+builder.Services.AddScoped<MappingGenerice>();
 
 var app = builder.Build();
 

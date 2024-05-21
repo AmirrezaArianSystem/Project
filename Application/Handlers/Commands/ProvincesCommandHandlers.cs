@@ -12,10 +12,9 @@ using MediatR;
 namespace Application.Handlers.Commands;
 
 #region Create Province Command Handler
-public class ProvinceCreateCommandHandler : BaseHandler<IProvinceRepository>,IRequestHandler<ProvinceCreateCommand, ResultObject<Guid>>
+public class ProvinceCreateCommandHandler : BaseHandler, IRequestHandler<ProvinceCreateCommand, ResultObject<Guid>>
 {
-    private IGenericRepository<BaseEntity> genericRepository { get; }
-    public ProvinceCreateCommandHandler(IUnitOfWork unitOfWork, IProvinceRepository repository, MappingGenerice mappingGenerice) : base(unitOfWork, repository, mappingGenerice)
+    public ProvinceCreateCommandHandler(IUnitOfWork unitOfWork, MappingGenerice mappingGenerice) : base(unitOfWork, mappingGenerice)
     {
     }
 
@@ -24,7 +23,9 @@ public class ProvinceCreateCommandHandler : BaseHandler<IProvinceRepository>,IRe
         var resultObject = new ResultObject<Guid>();
         try
         {
-            var provinceIsExist = await _repository.ProvinceIsExist(request.Name);
+            var provinceRepository = _unitOfWork.GetRepository<Province>();
+
+            var provinceIsExist = await provinceRepository.ExistsAsync(province=>province.Name== request.Name.Trim());
             if (provinceIsExist)
             {
                 resultObject.Errors = [string.Format(ErrorMessage.NameExists, request.Name)];
@@ -33,12 +34,12 @@ public class ProvinceCreateCommandHandler : BaseHandler<IProvinceRepository>,IRe
             }
 
             var province = _mappingGenerice.map<Province>(request);
-            await _repository.AddAsync(province);
+            await provinceRepository.AddAsync(province);
             await _unitOfWork.CommitAsync(cancellationToken);
             resultObject.Data = province.Id;
             return resultObject;
         }
-        catch(Exception ex) 
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
             resultObject.Errors = [ErrorMessage.HandlError];
@@ -50,12 +51,10 @@ public class ProvinceCreateCommandHandler : BaseHandler<IProvinceRepository>,IRe
 #endregion /Create Province Command Handler
 
 #region Delete Province Command Handler
-public class ProvinceDeleteCommandHandler : BaseHandler<IProvinceRepository>, IRequestHandler<ProvinceDeleteCommand, ResultObject<string>>
+public class ProvinceDeleteCommandHandler : BaseHandler, IRequestHandler<ProvinceDeleteCommand, ResultObject<string>>
 {
-    private ICityRepository _cityRepository { get; }
-    public ProvinceDeleteCommandHandler(IUnitOfWork unitOfWork, IProvinceRepository repository, MappingGenerice mappingGenerice, ICityRepository cityRepository) : base(unitOfWork, repository, mappingGenerice)
+    public ProvinceDeleteCommandHandler(IUnitOfWork unitOfWork, MappingGenerice mappingGenerice) : base(unitOfWork, mappingGenerice)
     {
-        _cityRepository = cityRepository;
     }
 
     public async Task<ResultObject<string>> Handle(ProvinceDeleteCommand request, CancellationToken cancellationToken)
@@ -63,21 +62,22 @@ public class ProvinceDeleteCommandHandler : BaseHandler<IProvinceRepository>, IR
         var resultObject = new ResultObject<string>();
         try
         {
+            var provinceRepository = _unitOfWork.GetRepository<Province>();
             cancellationToken.ThrowIfCancellationRequested();
-            var province = await _repository.GetAsync(request.Id);
+            var province = await provinceRepository.GetAsync(request.Id);
             if (province == null)
             {
                 resultObject.Errors = [string.Format(ErrorMessage.DoesNotExist, request.Id)];
                 return resultObject;
             }
-            cancellationToken.ThrowIfCancellationRequested();
-            var cityIsExist=await _cityRepository.CityIsExist(request.Id,null);
+            var cityRepository = _unitOfWork.GetRepository<City>();
+            var cityIsExist = await cityRepository.ExistsAsync(selector:s=>s.ProvinceId==province.Id);
             if (cityIsExist)
             {
                 resultObject.Errors = [ErrorMessage.CityExistForDeleteProvince];
                 return resultObject;
             }
-            await _repository.DeleteAsync(province);
+            await provinceRepository.DeleteAsync(province);
             await _unitOfWork.CommitAsync(cancellationToken);
             resultObject.Data = string.Format(ErrorMessage.Deleted, request.Id);
             return resultObject;
@@ -85,16 +85,16 @@ public class ProvinceDeleteCommandHandler : BaseHandler<IProvinceRepository>, IR
         catch
         {
             resultObject.Errors = [ErrorMessage.HandlError];
-             return resultObject;
+            return resultObject;
         }
     }
 }
 #endregion /Delete Province Command Handler
 
 #region  Update Province Handler
-public class UpdateProvinceHandler : BaseHandler<IProvinceRepository>, IRequestHandler<ProvinceUpdateCommand, ResultObject<string>>
+public class UpdateProvinceHandler : BaseHandler, IRequestHandler<ProvinceUpdateCommand, ResultObject<string>>
 {
-    public UpdateProvinceHandler(IUnitOfWork unitOfWork, IProvinceRepository repository, MappingGenerice mappingGenerice) : base(unitOfWork, repository, mappingGenerice)
+    public UpdateProvinceHandler(IUnitOfWork unitOfWork, MappingGenerice mappingGenerice) : base(unitOfWork, mappingGenerice)
     {
     }
 
@@ -102,17 +102,19 @@ public class UpdateProvinceHandler : BaseHandler<IProvinceRepository>, IRequestH
     {
         var resultObject = new ResultObject<string>();
         try
-        {         
-            var province = await _repository.GetAsync(request.Id);
+        {
+            var provinceRepository = _unitOfWork.GetRepository<Province>();
+
+            var province = await provinceRepository.GetAsync(request.Id);
             if (province == null)
             {
-                resultObject.Errors =[string.Format(ErrorMessage.DoesNotExist, request.Id)];
+                resultObject.Errors = [string.Format(ErrorMessage.DoesNotExist, request.Id)];
                 return resultObject;
 
             }
-            province.Name = request.Name;
-            province.population = request.Population;
-            _repository.Uptate(province);
+           _mappingGenerice._mapper.Map(request,province,typeof(ProvinceUpdateCommand),typeof(Province));
+         
+            provinceRepository.Uptate(province);
             await _unitOfWork.CommitAsync(cancellationToken);
             resultObject.Data = string.Format(ErrorMessage.Updated, request.Id);
             return resultObject;

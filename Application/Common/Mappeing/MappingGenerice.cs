@@ -9,15 +9,15 @@ namespace Application.Common.Mappeing
 {
     public class MappingGenerice
     {
-        private IMapper _mapper { get; }
+        public IMapper _mapper { get; }
 
         public MappingGenerice(IMapper mapper)
         {
             _mapper = mapper;
         }
-        public TDestination map<TDestination>(object sourse) where TDestination : class
+        public TDestination map<TDestination>(object sourse) 
         {
-           return _mapper.Map<TDestination>(sourse);
+            return _mapper.Map<TDestination>(sourse);
         }
 
     }

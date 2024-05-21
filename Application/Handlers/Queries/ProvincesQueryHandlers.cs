@@ -15,18 +15,24 @@ using System.Threading.Tasks;
 namespace Application.Handlers.Queries;
 
 #region Get Provinces Query Handler
-public class ProvincesGetQueryHandler : BaseHandler<IProvinceRepository>, IRequestHandler<ProvincesGetQuery, ResultObject<List<ProvinceDto>>>
+public class ProvincesGetQueryHandler : BaseHandler, IRequestHandler<ProvincesGetQuery, ResultObject<List<ProvinceDto>>>
 {
-    public ProvincesGetQueryHandler(IUnitOfWork unitOfWork, IProvinceRepository repository, MappingGenerice mappingGenerice) : base(unitOfWork, repository, mappingGenerice)
+    public ProvincesGetQueryHandler(IUnitOfWork unitOfWork, MappingGenerice mappingGenerice) : base(unitOfWork, mappingGenerice)
     {
     }
 
     public async Task<ResultObject<List<ProvinceDto>>> Handle(ProvincesGetQuery request, CancellationToken cancellationToken)
     {
+        List<ProvinceDto> provincesDto;
+        var provinceRepository= IRepository<Province>();
         cancellationToken.ThrowIfCancellationRequested();
-        var result = await _repository.GetAllProvinceAsync(request.name);
+        if(request.name != null)
+         provincesDto = await provinceRepository.GetAllAsync<ProvinceDto>(predicate: p => p.Name == request.name);
+        else
+         provincesDto = await provinceRepository.GetAllAsync<ProvinceDto>();
+
         var resultObject = new ResultObject<List<ProvinceDto>>();
-        resultObject.Data = result;
+        resultObject.Data = provincesDto;
         return resultObject;
     }
 }
